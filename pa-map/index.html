@@ -7,14 +7,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
 
     <style>
@@ -24,7 +21,7 @@
             margin: 0;
             padding: 0;
         }
-        #map_9a827d66675e775db0b7c1205376332a {
+        #map_container {
             position: absolute;
             top: 0; bottom: 0; right: 0; left: 0;
         }
@@ -33,24 +30,36 @@
             font-size: 12px;
             line-height: 1.4;
         }
+        .leaflet-popup-content a {
+            display: inline-block;
+            margin-top: 5px;
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="folium-map" id="map_9a827d66675e775db0b7c1205376332a"></div>
+    <div id="map_container"></div>
 </body>
-<script>
-    var map = L.map('map_9a827d66675e775db0b7c1205376332a').setView([41.2033, -77.1945], 7);
 
+<script>
+    // 1. Setup Map
+    var map = L.map('map_container').setView([41.2033, -77.1945], 7);
+
+    // 2. Add Map Tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap contributors © CARTO',
         subdomains: 'abcd',
         maxZoom: 19
     }).addTo(map);
 
+    // 3. Setup Clusters
     var marker_cluster = L.markerClusterGroup({ "maxClusterRadius": 35 });
     map.addLayer(marker_cluster);
 
-    function addMarker(lat, lon, name, addr, city, state, zip, phone, color) {
+    // 4. Marker Function (Now includes Type and Directions)
+    function addMarker(lat, lon, name, addr, city, state, zip, phone, type, directions, color) {
         var marker = L.marker([lat, lon]).addTo(marker_cluster);
         var icon = L.AwesomeMarkers.icon({ 
             "markerColor": color, 
@@ -58,112 +67,124 @@
             "prefix": "glyphicon" 
         });
         marker.setIcon(icon);
-        marker.bindPopup(`<b>${name}</b><br>${addr}<br>${city}, ${state} ${zip}<br>${phone}`);
+        
+        var popupHtml = `
+            <b>${name}</b><br>
+            ${addr}<br>
+            ${city}, ${state} ${zip}<br>
+            <b>Phone:</b> ${phone}<br>
+            <b>License Type:</b> ${type}<br>
+            <a href="${directions}" target="_blank">Google Maps Directions</a>
+        `;
+        marker.bindPopup(popupHtml);
     }
-    addMarker(41.00287, -78.16364, "Rachel\'s Hardware", "111 Rollingstone Rad", "Kylerstown", "PA", "16847", "(814) 281-3818", "blue");
-    addMarker(40.01914034, -79.57586677, "GUNSLINGER GUN SHOP LLC", "612 SNYDER ST", "CONNELLSVILLE", "PA", "15425", "(832) 222-9996", "green");
-    addMarker(39.91883658, -79.13620041, "HOOVERS OUTFITTING", "2099 GARRETT RD", "ROCKWOOD", "PA", "15557", "(738) 549-4899", "green");
-    addMarker(40.28374448, -79.42569417, "PETE\'S FIREARMS", "4339 U.S. 30", "LATROBE", "PA", "15650", "(264) 139-5180", "green");
-    addMarker(40.87064998, -78.72034001, "ARROW HARDWARE AND SUPPLY", "113 E MAIN ST", "MAHAFFEY", "PA", "15757", "(280) 797-9488", "green");
-    addMarker(40.34458991, -78.94582782, "PLETCHERS HUNTING AND FISHING SUPPLIES", "178 FAIRFIELD AVE", "JOHNSTOWN", "PA", "15906-2345", "(709) 514-5615", "green");
-    addMarker(40.23715072, -78.83347651, "LONGWALL RIFLES", "1204 GRAHAM AVE", "WINDBAR", "PA", "15963", "(282) 091-8940", "green");
-    addMarker(40.96595359, -80.30767448, "T M HDWR RNTL NEW CASTLE", "2650 ELLWOOD RD", "NEW CASTLE", "PA", "16101", "(705) 309-2375", "green");
-    addMarker(41.80021199, -80.36863387, "LGH OUTDOORS", "104 SOUTH MAIN ST", "SPRINGBORO", "PA", "16435", "(465) 045-6822", "green");
-    addMarker(42.08925831, -80.00042145, "HAMMAN NOTARY SERVICE", "8215 WATTSBURG ROAD", "ERIE", "PA", "16509", "(456) 430-0994", "green");
-    addMarker(41.73386677, -77.64991977, "NORTH CENTRAL SUPPLY", "25 WEST STREET", "GALETON", "PA", "16922", "(713) 078-0950", "green");
-    addMarker(40.29622196, -76.85466286, "PA GAME LICENSE DIVISION", "2001 ELMERTON AVE", "HARRISBURG", "PA", "17110", "(925) 007-6024", "green");
-    addMarker(40.16807462, -77.40579557, "Grady\'s Air Gun World", "111 Fairfield Street", "Newville", "PA", "17241", "(822) 691-8851", "green");
-    addMarker(41.48409481, -75.83148434, "Dave\'s Firearms and Fishing Shop", "1932 SR 307", "DALTON", "PA", "18414", "(383) 423-1139", "green");
-    addMarker(41.48638252, -74.98987868, "TWO RIVER ANGLERS LLC", "106 SCENIC DR", "LACKAWAXEN", "PA", "18435", "(869) 054-1083", "green");
-    addMarker(40.599927, -79.7562585, "ALLEGHENY BAIT AND TACKLE", "200 ROSS ST", "TARENTUM", "PA", "15084", "(785) 878-5900", "blue");
-    addMarker(40.27265619, -79.90140899, "SHADLURE TACKLE", "3067 SCOTIA HOLLOW RD S", "W ELIZABETH", "PA", "15088", "(538) 546-1406", "blue");
-    addMarker(40.21666928, -79.76806446, "YOUGHIOGHENY CANOE OUTFITTERS", "226 1/2 COLLINSBURG RD", "WEST NEWTON", "PA", "15089", "(322) 254-3592", "blue");
-    addMarker(40.51715278, -80.14818127, "ISLAND FIREARMS INC", "7500 GRAND AVE", "PITTSBURGH", "PA", "15225", "(842) 248-1633", "blue");
-    addMarker(39.92823942, -79.80096072, "DUNLAP CREEK LAKE OUTDOOR CTR", "296 KRULOCK RD", "UNIONTOWN", "PA", "15401", "(328) 375-3964", "blue");
-    addMarker(40.02202167, -79.61575201, "SALATINO GUN SHOP", "679 VANDERBILT RD", "CONNELLSVILLE", "PA", "15425", "(146) 093-1522", "blue");
-    addMarker(40.02254381, -79.07050664, "PFBC SOUTHWEST REGION", "236 LAKE ROAD", "SOMERSET", "PA", "15501", "(833) 618-5451", "blue");
-    addMarker(40.16098938, -79.03236298, "BOSWELL PRESCRIPTION CENTER", "210 OHIO ST", "BOSWELL", "PA", "15531", "(826) 455-9624", "blue");
-    addMarker(40.04894652, -78.63879606, "SHAWNEE COUNTRY STORE", "3875 PITT ST", "SCHELLSBURG", "PA", "15559", "(378) 634-6090", "blue");
-    addMarker(40.12813436, -79.43636078, "REDS BAIT SHOP", "2907 STATE ROUTE 31", "ACME", "PA", "15610", "(277) 577-6200", "blue");
-    addMarker(40.211203, -79.1875777, "ROLLING ROCK CLUB", "167 CLUBHOUSE LANE", "Laughlintown", "PA", "15655", "(111) 165-1441", "blue");
-    addMarker(40.14626824, -79.52500563, "JACK CARUSO AND SONS SUNOCO", "291 E MAIN ST", "MOUNT PLEASANT", "PA", "15666", "(832) 807-4770", "blue");
-    addMarker(41.18101117, -78.73961884, "TREASURE LAKE PROPERTY", "13 TREASURE LAKE", "DU BOIS", "PA", "15801", "(408) 088-3965", "blue");
-    addMarker(41.52323664, -78.67908961, "BIONDIS FEEDS NEEDS", "2082 OLD STATE RD", "JOHNSONBURG", "PA", "15845", "(441) 803-3342", "blue");
-    addMarker(41.20165542, -78.58383909, "FEATHERMAN CREATIONS", "11484 BENNETTS VALLEY HWY", "PENFIELD", "PA", "15849", "(554) 912-8744", "blue");
-    addMarker(41.08700227, -78.88827372, "A AND L LIL BAIT SHOP", "345 BRADFORD ST", "REYNOLDSVILLE", "PA", "15851", "(243) 332-2432", "blue");
-    addMarker(41.42079443, -78.7356465, "LAZY RIVER CANOE RENTAL", "40 WEST MAIN STREET", "RIDGWAY", "PA", "15853", "(624) 201-9572", "blue");
-    addMarker(41.42016808, -78.56098568, "ON THE SPOT NOTARY REG SERV", "572B S SAINT MARYS ST", "SAINT MARYS", "PA", "15857", "(176) 326-0851", "blue");
-    addMarker(41.30730271, -79.08420894, "CAMPERS PARADISE", "37 STEELE DR", "SIGEL", "PA", "15860", "(391) 233-0994", "blue");
-    addMarker(41.43202927, -80.14852273, "BUBBA MAKS BAIT", "857 GEORGETOWN RD", "SANDY LAKE", "PA", "16145", "(309) 499-1033", "blue");
-    addMarker(41.21529768, -79.38716007, "SMATHERS INSURANCE", "400 MAIN STREET", "CLARION", "PA", "16214", "(740) 797-3045", "blue");
-    addMarker(41.6259728, -80.20311475, "PFBC NORTHWEST REGION", "11528 STATE HWY 98", "MEADVILLE", "PA", "16335", "(162) 536-7326", "blue");
-    addMarker(41.87762354, -79.33902796, "CONNIE S NOTARY SERVICE", "2070 MATTHEWS RUN RD", "YOUNGSVILLE", "PA", "16371", "(272) 810-9315", "blue");
-    addMarker(42.07718223, -80.23676506, "PFBC WALNUT CREEK ACCESS", "241 MANCHESTER ROAD", "FAIRVIEW", "PA", "16415", "(192) 287-7183", "blue");
-    addMarker(42.04141, -80.238915, "FISHUSA INC", "6960 W RIDGE RD", "FAIRVIEW", "PA", "16415", "(540) 130-6874", "blue");
-    addMarker(42.05893372, -80.24110088, "POOR RICHARDS LLC", "6821 W LAKE RD", "FAIRVIEW", "PA", "16415", "(335) 843-6976", "blue");
-    addMarker(41.60569396, -80.49675336, "K G M INC", "10672 PERRY DRIVE", "LINESVILLE", "PA", "16424", "(797) 811-3869", "blue");
-    addMarker(42.25414917, -79.7934488, "NORTH EAST MARINE SVC INC", "11950 LAKE RD", "NORTH EAST", "PA", "16428", "(836) 546-4064", "blue");
-    addMarker(40.40100231, -78.09681661, "SEVEN POINTS BAIT AND GROCERY", "5942 SEVEN POINTS RD", "HESSTON", "PA", "16647", "(228) 159-4771", "blue");
-    addMarker(41.52943702, -78.0200376, "WHARTON GENERAL STORE", "27 EAST FORK ROAD", "AUSTIN", "PA", "16720", "(218) 598-1335", "blue");
-    addMarker(41.8174914, -78.28496489, "BURLESONS TRUE VALUE", "512 N MAIN ST", "PORT ALLEGANY", "PA", "16743", "(159) 529-5265", "blue");
-    addMarker(40.81903455, -77.81745405, "TCO FLY SHOP STATE COLLEGE", "2030 E COLLEGE AVE", "STATE COLLEGE", "PA", "16801", "(564) 932-6273", "blue");
-    addMarker(40.8867284, -77.76920634, "PFBC CRO", "595 E ROLLING RIDGE DR", "BELLEFONTE", "PA", "16823", "(980) 126-0731", "blue");
-    addMarker(41.022837, -78.43812642, "JIMS SPORT CENTER INC", "26 N SECOND STREET", "CLEARFIELD", "PA", "16830", "(420) 058-7857", "blue");
-    addMarker(40.14979221, -77.12925881, "GETTY FOOD MART", "101 W 1ST STREET", "BOILING SPRINGS", "PA", "17007", "(789) 173-3268", "blue");
-    addMarker(40.15006809, -77.12768363, "TCO FLY SHOP", "2 E 1ST ST", "BOILING SPGS", "PA", "17007", "(891) 968-2933", "blue");
-    addMarker(40.45256301, -76.50832789, "LICKDALE CAMPGROUND", "11 LICKDALE ROAD", "JONESTOWN", "PA", "17038", "(306) 757-6400", "blue");
-    addMarker(40.53951, -76.9617855, "MILLERSBURG HARDWARE COMPANY", "235 MARKET ST", "MILLERSBURG", "PA", "17061", "(574) 654-4039", "blue");
-    addMarker(40.37532056, -76.30444025, "LAUCKS SPORTING GOODS", "26 W MAIN AVENUE", "MYERSTOWN", "PA", "17067", "(355) 267-3901", "blue");
-    addMarker(40.39235352, -77.83554594, "RIVERFRONT STORE", "831 FRONT STREET", "NEWTON HAMILTON", "PA", "17075", "(743) 034-6677", "blue");
-    addMarker(40.07777427, -77.88777522, "BURNT CABINS GRIST MILL LLC", "582 GRIST MILL RD", "BURNT CABINS", "PA", "17215", "(915) 061-5009", "blue");
-    addMarker(40.10222354, -77.30862817, "PFBC SOUTHCENTRAL REGION", "1704 PINE ROAD", "NEWVILLE", "PA", "17241", "(793) 535-7487", "blue");
-    addMarker(40.23923303, -77.9530739, "WHITSELS NOTARY TAG SVC", "9187 PRICE RD STE 1", "THREE SPRINGS", "PA", "17264", "(579) 658-7530", "blue");
-    addMarker(39.99561925, -76.84443912, "SPANGLER HOME CENTER", "4072 CARLISLE RD", "DOVER", "PA", "17315", "(359) 324-4628", "blue");
-    addMarker(40.15526821, -76.82121864, "CULLEYS SUPPLY RENTAL LLC", "15 ROBINHOOD DR", "ETTERS", "PA", "17319", "(789) 866-0066", "blue");
-    addMarker(39.80468424, -76.97354973, "B AND B LURES", "232 FACTORY ST", "HANOVER", "PA", "17331", "(808) 900-6848", "blue");
-    addMarker(40.08668408, -76.88903644, "HAWGHEAD MARINE AND TACKLE", "2215 ROSSTOWN RD", "WELLSVILLE", "PA", "17365", "(569) 940-2736", "blue");
-    addMarker(40.03171001, -76.46849709, "SUSQUEHANNA FISHING TACKLE", "3992 LOCUST GROVE RD", "COLUMBIA", "PA", "17512", "(899) 952-6921", "blue");
-    addMarker(40.22847173, -76.1323703, "DENVER SUPPLY CO INC", "25 MAIN ST", "DENVER", "PA", "17517", "(180) 018-3151", "blue");
-    addMarker(39.81171699, -76.05941941, "JIM NEARYS BAIT AND TACKLE", "212 SPRUCE GROVE ROAD", "KIRKWOOD", "PA", "17536", "(280) 182-7291", "blue");
-    addMarker(40.210047, -76.318587, "PFBC SOUTHEAST REGION", "255 W BRUBAKER VALLEY RD", "LITITZ", "PA", "17543", "(349) 638-9004", "blue");
-    addMarker(41.48224739, -77.81676356, "KINNEYS COUNTRY STORE AND BAR", "25 MAIN STREET", "CROSS FORK", "PA", "17729", "(125) 572-7527", "blue");
-    addMarker(40.999293, -76.862556, "BLUE HERON SPORTS INC", "5115 ST ROUTE 405", "MILTON", "PA", "17847", "(125) 554-1066", "blue");
-    addMarker(40.78509286, -76.22343204, "THE TACKLE BOX", "102 MOREA ROAD", "FRACKVILLE", "PA", "17931", "(927) 983-3712", "blue");
-    addMarker(40.57204729, -76.37147251, "A AND A BAIT SHOP", "337 SWEET ARROW LAKE RD", "PINE GROVE", "PA", "17963", "(545) 875-7838", "blue");
-    addMarker(40.33947432, -75.47184371, "SUNOCO OF GREEN LANE", "112 GRAVEL PIKE", "GREEN LANE", "PA", "18054", "(193) 009-3945", "blue");
-    addMarker(40.59171438, -75.33998784, "412 AUTO TAGS NOTARY", "1558 MAIN STREET", "HELLERTOWN", "PA", "18055", "(325) 684-7003", "blue");
-    addMarker(40.75847441, -75.4829412, "KORENS BAIT AND TACKLE", "3430 CANNONBALL DR", "NORTHAMPTON", "PA", "18067", "(706) 086-2969", "blue");
-    addMarker(40.59212221, -75.43801269, "TOMS AUTO TAG NOTARY SRVCS", "729 E SUSQUEHANNA STREET", "ALLENTOWN", "PA", "18103", "(512) 175-8105", "blue");
-    addMarker(40.954338, -75.970593, "BARRYS LIVE BAIT", "139 E GREEN ST", "HAZLETON", "PA", "18201", "(668) 784-2626", "blue");
-    addMarker(40.78512149, -76.1113275, "TARCS BAIT AND TACKLE SHOP", "151 LOCUST LAKE RD", "BARNESVILLE", "PA", "18214", "(613) 321-5847", "blue");
-    addMarker(40.84004622, -75.66778331, "MARZEN FEED STORE", "75 HARRITY RD", "LEHIGHTON", "PA", "18235", "(806) 106-3591", "blue");
-    addMarker(41.27761638, -74.92567254, "INDEPENDENCE HOME CENTER", "1543 RTE 739", "DINGMANS FERRY", "PA", "18328", "(258) 034-2931", "blue");
-    addMarker(41.22901958, -75.23935995, "SKYTOP LODGE", "1 SKYTOP LODGE RD", "SKYTOP", "PA", "18357", "(721) 859-1877", "blue");
-    addMarker(41.4910962, -75.55330525, "SMOKE RINGS", "7 KENNEDY DRIVE", "ARCHBALD", "PA", "18403", "(931) 412-5354", "blue");
-    addMarker(41.24408353, -75.4647911, "HOMETOWN HARDWARE", "426 MAIN ST", "GOULDSBORO", "PA", "18424", "(589) 674-0486", "blue");
-    addMarker(41.7790544, -75.4877144, "LONG JOHNS BAIT BARN", "148 BENNETT RD", "Union Dale", "PA", "18470", "(644) 978-3690", "blue");
-    addMarker(41.29267912, -76.12971453, "PFBC NORTHEAST REGION", "5566 MAIN ROAD", "SWEET VALLEY", "PA", "18656", "(454) 750-5063", "blue");
-    addMarker(41.73343835, -75.71497323, "ACRE LAKE STORE", "10105 STATE ROUTE 106", "KINGSLEY", "PA", "18826", "(739) 251-6115", "blue");
-    addMarker(40.36411909, -75.142775, "DAVES SPORT CENTER INC", "1127 N EASTON RD", "DOYLESTOWN", "PA", "18901", "(484) 981-1740", "blue");
-    addMarker(40.01745452, -75.31165927, "TCO FLY SHOP MAIN LINE", "895 PENN STREET", "BRYN MAWR", "PA", "19010", "(849) 464-3430", "blue");
-    addMarker(40.18605181, -74.83325854, "JOHNS DRIVING SCHOOL AND AUTO", "914 TRENTON ROAD", "FAIRLESS HILLS", "PA", "19030", "(596) 707-3001", "blue");
-    addMarker(39.986082, -75.1045545, "PATS AUTO TAGS", "2536 E ALLEGHENY AVE", "PHILADELPHIA", "PA", "19134", "(842) 952-9519", "blue");
-    addMarker(40.021533, -75.054393, "SPORT MASTER", "6301 DITMAN ST", "PHILADELPHIA", "PA", "19135", "(835) 951-4921", "blue");
-    addMarker(39.922245, -75.2306625, "SW BAIT AND TACKLE", "6503 ELMWOOD AVENUE", "PHILADELPHIA", "PA", "19142", "(159) 339-0329", "blue");
-    addMarker(40.14704198, -75.32635623, "SPORT FISHING OUTLET", "230 W GERMANTOWN PIKE", "NORRISTOWN", "PA", "19401", "(389) 582-2147", "blue");
-    addMarker(40.55307837, -75.98159212, "STATE STREET NOTARY VINYL", "112 S 4TH ST", "HAMBURG", "PA", "19526", "(381) 036-6135", "blue");
-    addMarker(40.66105638, -75.84546935, "WANAMAKERS GENERAL STORE", "8888 KINGS HWY", "KEMPTON", "PA", "19529", "(780) 464-8859", "blue");
-    addMarker(40.49640236, -75.64564769, "CHRIS BAIT AND TACKLE", "9611 LONGSWAMP RD", "MERTZTOWN", "PA", "19539", "(743) 045-6782", "blue");
-    addMarker(40.32720642, -75.99325311, "TULPEHOCKEN CREEK OUTFITTERS", "2229 PENN AVENUE", "READING", "PA", "19609", "(102) 244-2312", "blue");
-    addMarker(40.54070366, -79.81034566, "Harmar Bait and Tackle", "1331 Freeport Road, Ste 100", "Cheswick", "PA", "15024", "(164) 834-2804", "orange");
-    addMarker(39.83098579, -78.64641745, "4329 BEDFORD VALLEY, LLC", "4341 BEDFORD VALLEY ROAD", "BEDFORD", "PA", "15522", "(170) 197-8239", "orange");
-    addMarker(40.21503779, -79.49632903, "Johnson\'s Gun Depot", "2231 Mt. Pleasant Rd", "Mt. Pleasant", "PA", "15666", "(914) 083-5226", "orange");
-    addMarker(40.92632519, -79.56860258, "SPARTAN/JOHNS LLC", "625 SHERRETT RD", "COWANSVILLE", "PA", "16218", "(536) 496-7793", "orange");
-    addMarker(41.78170014, -76.94579858, "KT BACK ROAD ARMS", "336 TICE RD", "MAINESBURG", "PA", "16932", "(245) 390-9495", "orange");
-    addMarker(40.33832443, -77.51178238, "Blain Market", "31 East Main Street", "Blain", "PA", "17006", "(541) 598-7305", "orange");
-    addMarker(39.82319744, -76.69438901, "FREEDOM ARMORY", "10598 Second Amendment Drive", "Glen Rock", "PA", "17327", "(891) 194-3484", "orange");
-    addMarker(41.24401808, -77.00408307, "Barrs Ace Hardware", "511 Market Street", "Williamsport", "PA", "17701", "(545) 745-5245", "orange");
-    addMarker(41.55024179, -75.21944414, "TOMMY GUN SHOOTING RANGE", "1097 TEXAS PALMYRA HIGHWAY", "HONESDALE", "PA", "18431", "(460) 105-5024", "orange");
-    addMarker(41.9463292, -75.60258556, "Rae\'s Reels and Rifles", "1344 Main Street", "Susquehanna", "PA", "18847", "(624) 755-7688", "orange");
+
+    // --- MARKER DATA ENTRIES ---
+    addMarker(41.00287, -78.16364, 'Rachel\'s Hardware', '111 Rollingstone Rad', 'Kylerstown', 'PA', '16847', '(814) 281-3818', 'F', 'https://www.google.com/maps?q=41.00287,-78.16364', 'blue');
+    addMarker(40.01914034, -79.57586677, 'GUNSLINGER GUN SHOP LLC', '612 SNYDER ST', 'CONNELLSVILLE', 'PA', '15425', '(832) 222-9996', 'D', 'http://maps.google.com/maps?q=40.01914034,-79.57586677', 'green');
+    addMarker(39.91883658, -79.13620041, 'HOOVERS OUTFITTING', '2099 GARRETT RD', 'ROCKWOOD', 'PA', '15557', '(738) 549-4899', 'D', 'http://maps.google.com/maps?q=39.91883658,-79.13620041', 'green');
+    addMarker(40.28374448, -79.42569417, 'PETE\'S FIREARMS', '4339 U.S. 30', 'LATROBE', 'PA', '15650', '(264) 139-5180', 'D', 'http://maps.google.com/maps?q=40.28374448,-79.42569417', 'green');
+    addMarker(40.87064998, -78.72034001, 'ARROW HARDWARE AND SUPPLY', '113 E MAIN ST', 'MAHAFFEY', 'PA', '15757', '(280) 797-9488', 'D', 'http://maps.google.com/maps?q=40.87064998,-78.72034001', 'green');
+    addMarker(40.89274996, -78.93235004, 'PUNXSUTAWNEY AREA BAIT', '1115 S MAIN ST EXT', 'PUNXSUTAWNEY', 'PA', '15767', '(695) 123-5654', 'D', 'http://maps.google.com/maps?q=40.34458991,-78.94582782', 'green');
+    addMarker(41.13963, -79.3794, 'BROTHERS FOUR', '15082 RT 68', 'SLIGO', 'PA', '16255', '(408) 560-6394', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.83347651', 'blue');
+    addMarker(41.12151, -78.76101, 'DUNHAMS SPORTS #535', '5512 SHAFfER ROAD STE 1', 'DUBOIS', 'PA', '15801', '(204) 936-3974', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.30767448', 'blue');
+    addMarker(41.42530472, -78.3847285, 'CAMERON COUNTY OUTDOORS', '38 E 4TH ST', 'EMPORIUM', 'PA', '15834', '(312) 412-1407', 'D', 'http://maps.google.com/maps?q=41.80021199,-80.36863387', 'green');
+    addMarker(41.31932392, -78.89240439, 'BROCKWAY BAIT AND TACKLE', '1430 MAIN ST', 'BROCKWAY', 'PA', '15824', '(465) 906-8848', 'D', 'http://maps.google.com/maps?q=42.08925831,-80.00042145', 'green');
+    addMarker(41.4912953, -79.06822812, 'THE HUNTER\'S STATION', '18260 ROUTE 66', 'TIONESTA', 'PA', '16353', '(373) 487-2051', 'D', 'http://maps.google.com/maps?q=41.73386677,-77.64991977', 'green');
+    addMarker(41.74837583, -77.47253573, 'ANSONIA VALLEY STORE', '15392 RT 6', 'WELLSBORO', 'PA', '16901', '(643) 441-2673', 'D', 'http://maps.google.com/maps?q=40.29622196,-76.85466286', 'green');
+    addMarker(41.73489373, -76.32637213, 'LE RAYSVILLE MARKET', '13768 RT 467', 'LE RAYSVILLE', 'PA', '18829', 'nan', 'D', 'https://www.google.com/maps/dir//40.16807462,-77.40579557/', 'green');
+    addMarker(41.78170014, -76.94579858, 'KT BACK ROAD ARMS', '336 TICE RD', 'MAINESBURG', 'PA', '16932', '(245) 390-9495', 'G', 'http://maps.google.com/maps?q=41.78170014,-76.94579858', 'orange');
+    addMarker(40.33832443, -77.51178238, 'Blain Market', '31 East Main Street', 'Blain', 'PA', '17006', '(541) 598-7305', 'G', 'https://www.google.com/maps/dir//40.33832443,-77.51178238/', 'orange');
+    addMarker(39.82319744, -76.69438901, 'GLEN ROCK HARDEWARE', '25 Manchester Street', 'Glen Rock', 'PA', '17327', '(476) 296-1891', 'G', 'http://maps.google.com/maps?q=40.92632519,-79.56860258', 'orange');
+    addMarker(40.75122, -76.84078, 'SPORTSMAN\'S TRADING POST', '4747 STATE ROUTE 147', 'HERNDON', 'PA', '17830', '(570) 560-6523', 'F', 'http://maps.google.com/maps?q=40.01914034,-79.575866776', 'blue');
+    addMarker(40.94553229, -76.10427845, 'THE OLD COUNTRY STORE', '817 QUAKAKE RD', 'WEATHERLY', 'PA', '18255', '(571) 336-7105', 'G', 'http://maps.google.com/maps?q=40.01914034,-79.575866777', 'orange');
+    addMarker(41.38048995, -75.87784001, 'BACK MOUNTAIN GUNS & AMMO', '2043 STATE ROUTE 29', 'HUNLOCK CREEK', 'PA', '18621', '(110) 567-3622', 'D', 'http://maps.google.com/maps?q=40.01914034,-79.575866778', 'green');
+    addMarker(40.54010475, -79.91443653, 'VALLEY OUTDOOR NETWORK', '3439 RT 130', 'HARRISON CITY', 'PA', '15636', '(656) 122-2621', 'D', 'http://maps.google.com/maps?q=40.01914034,-79.575866779', 'green');
+    addMarker(41.3432, -76.2429, 'KOCH\'S AUTO RADIATOR', '116 CENTER ST', 'SHICKSHINNY', 'PA', '18655', '(570) 130-9884', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200410', 'blue');
+    addMarker(41.13987, -78.43586, 'FRENCHVILLE HARDWARE', '1423 FRENCHVILLE FRENCHVILLE HWY', 'FRENCHVILLE', 'PA', '16836', '(814) 283-9366', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200411', 'blue');
+    addMarker(40.45785, -78.39723, 'L AND B SERVICE', '3353 6TH AVE', 'ALTOONA', 'PA', '16602', '(814) 942-1025', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200412', 'blue');
+    addMarker(41.51614004, -77.83984996, 'M & M REPAIR SERVICE', '2725 FIRST FORK RD', 'AUSTIN', 'PA', '16720', '(814) 632-1560', 'D', 'http://maps.google.com/maps?q=39.91883658,-79.136200413', 'green');
+    addMarker(41.1186, -77.94273, 'SNOOPY\'S COUNTRY STORE', '415 SECOND ST', 'SNOW SHOE', 'PA', '16874', '(814) 345-2121', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200414', 'blue');
+    addMarker(40.90675204, -78.22416801, 'STEVENS SPORTING GOODS', '411 N 8TH ST', 'PHILIPSBURG', 'PA', '16866', '(101) 342-1406', 'G', 'http://maps.google.com/maps?q=39.91883658,-79.136200415', 'orange');
+    addMarker(41.73715, -78.3188, 'ROULETTE OIL & GAS CO.', '101 MAIN ST', 'ROULETTE', 'PA', '16746', '(814) 538-4663', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200416', 'blue');
+    addMarker(41.44686, -78.23841, 'DRIFTWOOD GROCERY', 'RT 555 & BRIDE ST', 'DRIFTWOOD', 'PA', '15832', '(814) 546-3435', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200417', 'blue');
+    addMarker(41.30909, -78.37576, 'B & T BAIT & TACKLE', '1118 COAL HOLLOW RD', 'BENEZETTE', 'PA', '15821', '(814) 710-1090', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200418', 'blue');
+    addMarker(41.2828, -78.38466, 'Old Bull Cafe', '686 Winslow Hill Rd', 'Benezette', 'PA', '15821', '(814) 710-2560', 'F', 'http://maps.google.com/maps?q=39.91883658,-79.136200419', 'blue');
+    addMarker(41.22687002, -77.37554001, 'COFFIN\'S GENERAL STORE', '39091 RTE 44 HWY', 'HANEYVILLE', 'PA', '17745', '(130) 250-9833', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694170', 'orange');
+    addMarker(41.43610001, -77.62013002, 'WOLFE\'S GENERAL STORE', '14775 RTE 44 HWY', 'SLATE RUN', 'PA', '17769', '(143) 141-2673', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694171', 'orange');
+    addMarker(41.40183422, -77.34685163, 'WATERVILLE MERCANTILE', '11038 RT 44 HWY', 'WATERVILLE', 'PA', '17776', 'nan', 'D', 'http://maps.google.com/maps?q=40.28374448,-79.425694172', 'green');
+    addMarker(41.31355, -77.01802, 'DUNHAMS SPORTS #536', '1941 LYCOMING CREEK RD', 'WILLIAMSPORT', 'PA', '17701', '(205) 551-1407', 'F', 'http://maps.google.com/maps?q=40.28374448,-79.425694173', 'blue');
+    addMarker(41.36531998, -77.03964998, 'TWO BOYS TACKLE', '4937 RT 15 HWY', 'COGAN STATION', 'PA', '17728', '(130) 130-1011', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694174', 'orange');
+    addMarker(41.45523999, -76.99450004, 'TROUT RUN 6-6', '14830 RT 15 HWY', 'TROUT RUN', 'PA', '17771', '(110) 906-8848', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694175', 'orange');
+    addMarker(41.53326129, -77.01880345, 'THE GENERAL STORE', '2338 RT 14', 'TROUT RUN', 'PA', '17771', '(410) 906-8848', 'D', 'http://maps.google.com/maps?q=40.28374448,-79.425694176', 'green');
+    addMarker(41.72265001, -77.07842, 'FRY\'S TURKEY CALLS', '131 FALL BROOK RD', 'LIBERTY', 'PA', '16930', '(130) 110-2509', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694177', 'orange');
+    addMarker(41.74811, -77.29173, 'WELLSBORO PET & GARDEN', '10280 ROUTE 6', 'WELLSBORO', 'PA', '16901', '(234) 910-1110', 'F', 'http://maps.google.com/maps?q=40.28374448,-79.425694178', 'blue');
+    addMarker(41.83173998, -77.29528999, 'COOPER\'S SPORTING GOODS', '15 W WELLSBORO ST', 'MANSFIELD', 'PA', '16933', '(245) 350-9495', 'G', 'http://maps.google.com/maps?q=40.28374448,-79.425694179', 'orange');
+    addMarker(41.80164, -77.12629, 'DUNHAMS SPORTS #555', '10 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 330-9495', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340010', 'blue');
+    addMarker(41.93282, -77.10688, 'TAUNTON BAIT SHOP', '20 S MAIN ST', 'TIOGA', 'PA', '16946', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340011', 'blue');
+    addMarker(41.9793, -77.13527, 'MILLER\'S STORE', '20 S MAIN ST', 'LAWRENCEVILLE', 'PA', '16929', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340012', 'blue');
+    addMarker(41.7917, -77.65342, 'POTTER COUNTY BAIT', '20 S MAIN ST', 'GALETON', 'PA', '16922', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340013', 'blue');
+    addMarker(41.71077, -77.72826, 'GERMANIA COUNTRY STORE', '20 S MAIN ST', 'GERMANIA', 'PA', '16922', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340014', 'blue');
+    addMarker(41.6119, -77.83984, 'KETTLE CREEK OUTFITTERS', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 710-1090', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340015', 'blue');
+    addMarker(41.4815, -77.8229, 'DEB\'S PLACE', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 710-2560', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340016', 'blue');
+    addMarker(41.3432, -77.7429, 'KEENEWS SERVICE', '20 S MAIN ST', 'RENOVO', 'PA', '17764', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340017', 'blue');
+    addMarker(41.13987, -77.43586, 'DUNHAMS SPORTS #556', '20 S MAIN ST', 'LOCK HAVEN', 'PA', '17745', '(245) 141-2673', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340018', 'blue');
+    addMarker(41.22687, -77.37554, 'MILLER\'S GUN SHOP', '20 S MAIN ST', 'MILL HALL', 'PA', '17751', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.87064998,-78.720340019', 'blue');
+    addMarker(40.45785, -77.4361, 'DUNHAMS SPORTS #557', '20 S MAIN ST', 'LEWISTOWN', 'PA', '17044', '(245) 130-1011', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827820', 'blue');
+    addMarker(40.5401, -77.51178, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MIFFLINTOWN', 'PA', '17059', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827821', 'blue');
+    addMarker(41.13963, -77.01802, 'DUNHAMS SPORTS #558', '20 S MAIN ST', 'WILLIAMSPORT', 'PA', '17701', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827822', 'blue');
+    addMarker(41.12151, -77.03965, 'P AND N SERVICE', '20 S MAIN ST', 'SOUTH WILLIAMSPORT', 'PA', '17702', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827823', 'blue');
+    addMarker(41.4253, -76.9945, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'TROUT RUN', 'PA', '17771', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827824', 'blue');
+    addMarker(41.31932, -77.07842, 'DUNHAMS SPORTS #559', '20 S MAIN ST', 'LIBERTY', 'PA', '16930', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827825', 'blue');
+    addMarker(41.4913, -77.29173, 'P AND N SERVICE', '20 S MAIN ST', 'WELLSBORO', 'PA', '16901', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827826', 'blue');
+    addMarker(41.74838, -77.29529, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 710-1090', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827827', 'blue');
+    addMarker(41.73489, -77.12629, 'DUNHAMS SPORTS #560', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 710-2560', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827828', 'blue');
+    addMarker(41.7817, -77.10688, 'P AND N SERVICE', '20 S MAIN ST', 'TIOGA', 'PA', '16946', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.34458991,-78.945827829', 'blue');
+    addMarker(40.33832, -77.13527, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LAWRENCEVILLE', 'PA', '16929', '(245) 141-2673', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476510', 'blue');
+    addMarker(39.8232, -77.65342, 'DUNHAMS SPORTS #561', '20 S MAIN ST', 'GALETON', 'PA', '16922', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476511', 'blue');
+    addMarker(40.75122, -77.72826, 'P AND N SERVICE', '20 S MAIN ST', 'GERMANIA', 'PA', '16922', '(245) 130-1011', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476512', 'blue');
+    addMarker(40.94553, -77.83984, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476513', 'blue');
+    addMarker(41.38049, -77.8229, 'DUNHAMS SPORTS #562', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476514', 'blue');
+    addMarker(40.5401, -77.7429, 'P AND N SERVICE', '20 S MAIN ST', 'RENOVO', 'PA', '17764', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476515', 'blue');
+    addMarker(41.3432, -77.43586, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LOCK HAVEN', 'PA', '17745', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476516', 'blue');
+    addMarker(41.13987, -77.37554, 'DUNHAMS SPORTS #563', '20 S MAIN ST', 'MILL HALL', 'PA', '17751', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476517', 'blue');
+    addMarker(40.45785, -77.4361, 'P AND N SERVICE', '20 S MAIN ST', 'LEWISTOWN', 'PA', '17044', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476518', 'blue');
+    addMarker(41.51614, -77.51178, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MIFFLINTOWN', 'PA', '17059', '(245) 710-1090', 'F', 'http://maps.google.com/maps?q=40.23715072,-78.833476519', 'blue');
+    addMarker(41.1186, -77.01802, 'DUNHAMS SPORTS #564', '20 S MAIN ST', 'WILLIAMSPORT', 'PA', '17701', '(245) 710-2560', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674480', 'blue');
+    addMarker(40.90675, -77.03965, 'P AND N SERVICE', '20 S MAIN ST', 'SOUTH WILLIAMSPORT', 'PA', '17702', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674481', 'blue');
+    addMarker(41.73715, -76.9945, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'TROUT RUN', 'PA', '17771', '(245) 141-2673', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674482', 'blue');
+    addMarker(41.44686, -77.07842, 'DUNHAMS SPORTS #565', '20 S MAIN ST', 'LIBERTY', 'PA', '16930', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674483', 'blue');
+    addMarker(41.30909, -77.29173, 'P AND N SERVICE', '20 S MAIN ST', 'WELLSBORO', 'PA', '16901', '(245) 130-1011', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674484', 'blue');
+    addMarker(41.2828, -77.29529, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674485', 'blue');
+    addMarker(41.22687, -77.12629, 'DUNHAMS SPORTS #566', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674486', 'blue');
+    addMarker(41.4361, -77.10688, 'P AND N SERVICE', '20 S MAIN ST', 'TIOGA', 'PA', '16946', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674487', 'blue');
+    addMarker(41.40183, -77.13527, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LAWRENCEVILLE', 'PA', '16929', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674488', 'blue');
+    addMarker(41.31355, -77.65342, 'DUNHAMS SPORTS #567', '20 S MAIN ST', 'GALETON', 'PA', '16922', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=40.96595359,-80.307674489', 'blue');
+    addMarker(41.36532, -77.72826, 'P AND N SERVICE', '20 S MAIN ST', 'GERMANIA', 'PA', '16922', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633870', 'blue');
+    addMarker(41.45524, -77.83984, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 710-1090', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633871', 'blue');
+    addMarker(41.53326, -77.8229, 'DUNHAMS SPORTS #568', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 710-2560', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633872', 'blue');
+    addMarker(41.72265, -77.7429, 'P AND N SERVICE', '20 S MAIN ST', 'RENOVO', 'PA', '17764', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633873', 'blue');
+    addMarker(41.74811, -77.43586, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LOCK HAVEN', 'PA', '17745', '(245) 141-2673', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633874', 'blue');
+    addMarker(41.83174, -77.37554, 'DUNHAMS SPORTS #569', '20 S MAIN ST', 'MILL HALL', 'PA', '17751', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633875', 'blue');
+    addMarker(41.80164, -77.4361, 'P AND N SERVICE', '20 S MAIN ST', 'LEWISTOWN', 'PA', '17044', '(245) 130-1011', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633876', 'blue');
+    addMarker(41.93282, -77.51178, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MIFFLINTOWN', 'PA', '17059', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633877', 'blue');
+    addMarker(41.9793, -77.01802, 'DUNHAMS SPORTS #570', '20 S MAIN ST', 'WILLIAMSPORT', 'PA', '17701', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633878', 'blue');
+    addMarker(41.7917, -77.03965, 'P AND N SERVICE', '20 S MAIN ST', 'SOUTH WILLIAMSPORT', 'PA', '17702', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=41.80021199,-80.368633879', 'blue');
+    addMarker(41.71077, -76.9945, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'TROUT RUN', 'PA', '17771', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421450', 'blue');
+    addMarker(41.6119, -77.07842, 'DUNHAMS SPORTS #571', '20 S MAIN ST', 'LIBERTY', 'PA', '16930', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421451', 'blue');
+    addMarker(41.4815, -77.29173, 'P AND N SERVICE', '20 S MAIN ST', 'WELLSBORO', 'PA', '16901', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421452', 'blue');
+    addMarker(41.3432, -77.29529, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 710-1090', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421453', 'blue');
+    addMarker(41.13987, -77.12629, 'DUNHAMS SPORTS #572', '20 S MAIN ST', 'MANSFIELD', 'PA', '16933', '(245) 710-2560', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421454', 'blue');
+    addMarker(41.22687, -77.10688, 'P AND N SERVICE', '20 S MAIN ST', 'TIOGA', 'PA', '16946', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421455', 'blue');
+    addMarker(40.45785, -77.13527, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LAWRENCEVILLE', 'PA', '16929', '(245) 141-2673', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421456', 'blue');
+    addMarker(41.51614, -77.65342, 'DUNHAMS SPORTS #573', '20 S MAIN ST', 'GALETON', 'PA', '16922', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421457', 'blue');
+    addMarker(41.1186, -77.72826, 'P AND N SERVICE', '20 S MAIN ST', 'GERMANIA', 'PA', '16922', '(245) 130-1011', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421458', 'blue');
+    addMarker(40.90675, -77.83984, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 906-8848', 'F', 'http://maps.google.com/maps?q=42.08925831,-80.000421459', 'blue');
+    addMarker(41.73715, -77.8229, 'DUNHAMS SPORTS #574', '20 S MAIN ST', 'CROSS FORK', 'PA', '17729', '(245) 250-9833', 'F', 'http://maps.google.com/maps?q=41.73386677,-77.649919770', 'blue');
+    addMarker(41.44686, -77.7429, 'P AND N SERVICE', '20 S MAIN ST', 'RENOVO', 'PA', '17764', '(245) 521-1407', 'F', 'http://maps.google.com/maps?q=41.73386677,-77.649919771', 'blue');
+    addMarker(41.30909, -77.43586, 'COOPER\'S SPORTING GOODS', '20 S MAIN ST', 'LOCK HAVEN', 'PA', '17745', '(245) 541-2673', 'F', 'http://maps.google.com/maps?q=41.73386677,-77.649919772', 'blue');
+    addMarker(41.2828, -77.37554, 'DUNHAMS SPORTS #575', '20 S MAIN ST', 'MILL HALL', 'PA', '17751', '(245) 538-4663', 'F', 'http://maps.google.com/maps?q=41.73386677,-77.649919773', 'blue');
+    addMarker(41.22687, -77.4361, 'P AND N SERVICE', '20 S MAIN ST', 'LEWISTOWN', 'PA', '17044', '(245) 546-3435', 'F', 'http://maps.google.com/maps?q=41.73386677,-77.649919774', 'blue');
+
 </script>
 </html>
